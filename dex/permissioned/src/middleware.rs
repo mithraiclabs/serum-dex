@@ -7,6 +7,7 @@ use anchor_spl::{dex, token};
 use serum_dex::instruction::*;
 use serum_dex::matching::Side;
 use serum_dex::state::OpenOrders;
+use std::collections::BTreeMap;
 use std::mem::size_of;
 
 /// Per request context. Can be used to share data between middleware handlers.
@@ -120,14 +121,14 @@ pub trait MarketMiddleware {
 #[derive(Default)]
 pub struct OpenOrdersPda {
     bump: u8,
-    bump_init: u8,
+    bump_init: u8
 }
 
 impl OpenOrdersPda {
     pub fn new() -> Self {
         Self {
             bump: 0,
-            bump_init: 0,
+            bump_init: 0
         }
     }
     fn prepare_pda<'info>(acc_info: &AccountInfo<'info>) -> AccountInfo<'info> {
@@ -169,7 +170,10 @@ impl MarketMiddleware for OpenOrdersPda {
 
         // Initialize PDA.
         let mut accounts = &ctx.accounts[..];
-        InitAccount::try_accounts(ctx.program_id, &mut accounts, &[self.bump, self.bump_init])?;
+        let mut bump_tree = BTreeMap::new();
+        bump_tree.insert(String::from("bump"), self.bump);
+        bump_tree.insert(String::from("bump_init"), self.bump_init);
+        InitAccount::try_accounts(ctx.program_id, &mut accounts, &[], &mut bump_tree)?;
 
         // Add signer to context.
         ctx.seeds.push(open_orders_authority! {
@@ -568,7 +572,7 @@ pub struct InitAccount<'info> {
     #[account(
         init,
         seeds = [b"open-orders", dex_program.key.as_ref(), market.key.as_ref(), authority.key.as_ref()],
-        bump = bump,
+        bump,
         payer = authority,
         owner = dex::ID,
         space = size_of::<OpenOrders>() + SERUM_PADDING,
