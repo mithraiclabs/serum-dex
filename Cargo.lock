@@ -2526,7 +2526,7 @@ dependencies = [
 
 [[package]]
 name = "psyfi-serum-dex-permissioned"
-version = "0.5.4"
+version = "0.5.5"
 dependencies = [
  "anchor-lang",
  "anchor-spl",
