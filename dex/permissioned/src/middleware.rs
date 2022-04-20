@@ -169,7 +169,9 @@ impl MarketMiddleware for OpenOrdersPda {
 
         // Initialize PDA.
         let mut accounts = &ctx.accounts[..];
-        InitAccount::try_accounts(ctx.program_id, &mut accounts, &[self.bump, self.bump_init])?;
+        let mut bumps = std::collections::BTreeMap::new();
+
+        InitAccount::try_accounts(ctx.program_id, &mut accounts, &[self.bump, self.bump_init], &mut bumps)?;
 
         // Add signer to context.
         ctx.seeds.push(open_orders_authority! {
